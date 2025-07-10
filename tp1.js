@@ -1,23 +1,22 @@
-
 let micTP1, fftTP1;
 let micOn = false;
-var espectro;
-const umbral = 0.04;
-
 let formasTP1 = [];
 let imagenesTP1 = [];
 let ultimaFormaTP1 = null;
+
+let haySonido = false;
+let umbralTiempo = 3;
+let tiempoDeSonido = 0;
 
 function preload() {
   for (let i = 1; i <= 3; i++) {
     imagenesTP1.push(loadImage(`forma${i}.png`));
   }
 }
-
+ 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(900, 800);
   micTP1 = new p5.AudioIn();
-
   fftTP1 = new p5.FFT();
   fftTP1.setInput(micTP1);
   imageMode(CENTER);
@@ -26,30 +25,54 @@ function setup() {
 function draw() {
   background(240, 227, 206, 10);
   let vol = micTP1.getLevel();
-
-  console.log("la amplitud es:" + vol);
-  console.log("micOn es:" + micOn);
-
-  if (vol >= 0.05) {
-    let zona = 1;
-    if (vol >= 0.08) zona = 2;
-    if (vol >= 0.12) zona = 3;
-
-    let x, y;
-    if (!ultimaFormaTP1 || ultimaFormaTP1.terminada()) {
-      if (zona === 1) y = random(height * 2 / 3, height);
-      if (zona === 2) y = random(height / 3, height * 2 / 3);
-      if (zona === 3) y = random(0, height / 3);
-      x = random(width);
-    } else {
-      x = ultimaFormaTP1.x + random(-30, 30);
-      y = ultimaFormaTP1.y - random(20, 50);
+console.log("volumen es:" + vol);
+ if (vol > 0.05) {
+    if (!haySonido) {
+      console.log("empieza el sonido");
+      tiempoDeSonido = millis();
     }
+    haySonido = true;
+  }
+
+   if (vol <= 0.005) {
+    let segundosDeSonido = (millis() - tiempoDeSonido) / 1000.0;
+    if (haySonido && segundosDeSonido > umbralTiempo) {
+console.log("se termina el sonido");
+      //agregar trazos con una cantidad definidad por el tiempoDeSonido
+      let cantidad = map(segundosDeSonido, 3, 10, 2, 20);
+let x, y;
+ for(let i=0;i<cantidad;i++){
+    if (!ultimaFormaTP1 || ultimaFormaTP1.terminada()) {  // Si no hay forma antes arrancamod desde el centro
+      x = width / 2;
+      y = height * 0.9; // para que empiece desde abajo
+    } else {
+      x = ultimaFormaTP1.x;
+      y = ultimaFormaTP1.y;
+    }
+    
+    let direccion = random([
+      { dx: 0, dy: -40 },   // las de arriba
+      { dx: 40, dy: -40 },  // diagonal arriba deecha
+      { dx: -40, dy: -40 }, // diagnal arriba izquierda
+      { dx: 40, dy: 0 },    // der
+      { dx: -40, dy: 0 },   // izqui
+    ]);
+
+    let nuevaX = constrain(x + direccion.dx + random(-10, 10), 50, width - 50);
+    let nuevaY = constrain(y + direccion.dy + random(-10, 10), 50, height - 50);
 
     let img = random(imagenesTP1);
-    let nueva = new FormaTP1(x, y, img);
+    let nueva = new FormaTP1(nuevaX, nuevaY, img);
     formasTP1.push(nueva);
     ultimaFormaTP1 = nueva;
+       }
+      console.log("Cantidad de trazos: " + cantidad);
+    }
+    haySonido = false;
+  }
+
+  if (vol >= 0.05) {
+    
   }
 
   for (let i = formasTP1.length - 1; i >= 0; i--) {
@@ -73,7 +96,9 @@ class FormaTP1 {
   }
 
   actualizar() {
-    this.alpha -= 3;
+    if (!micTP1.enabled || micTP1.getLevel() < 0.05) {
+      this.alpha -= 3;
+    }
   }
 
   mostrar() {
@@ -85,8 +110,7 @@ class FormaTP1 {
     pop();
   }
 
-
-terminada() {
+  terminada() {
     return this.alpha <= 0;
   }
 }
@@ -95,11 +119,10 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-function mousePressed(){
-
-  if (micOn == false){
+function mousePressed() {
+  userStartAudio();
+  if (!micOn) {
     micOn = true;
     micTP1.start();
- 
   }
 }
