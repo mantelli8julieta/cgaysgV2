@@ -12,7 +12,7 @@ let umbralTiempo = 3;
 let tiempoDeSonido = 0;
 
 function preload() {
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     imagenesTP1.push(loadImage(`formas/forma${i}.png`));
   }
 }
@@ -32,7 +32,7 @@ function draw() {
 
   if (vol > 0.005) {
     if (!haySonido) {
-      console.log("empieza el sonido");
+      console.log("empieza el input");
       tiempoDeSonido = millis();
     }
     haySonido = true;
@@ -41,12 +41,11 @@ function draw() {
   if (vol <= 0.07) {
     let segundosDeSonido = (millis() - tiempoDeSonido) / 1000.0;
     if (haySonido && segundosDeSonido > umbralTiempo) {
-      console.log("se termina el sonido");
+      console.log("se termina el input");
       let cantidad = map(segundosDeSonido, 3, 10, 2, 20);
 
       for (let i = 0; i < cantidad; i++) {    
         let x, y, angulo;
-
         // se alterna entre ambas direcciones
         if (alternarDir) {
           // generación d verticales
@@ -70,10 +69,10 @@ function draw() {
           if (!ultimaFormaH || ultimaFormaH.terminada()) {
             x = width / 2;
             y = height / 2;
-            angulo = gradosH;
           } else {
             x = ultimaFormaH.x;
             y = ultimaFormaH.y;
+            angulo = HALF_PI;
           }
 
           let direccion = random([
@@ -81,7 +80,9 @@ function draw() {
             { dx: -40, dy: 0 }
           ]);
 
-          ultimaFormaH = generarForma(x, y, direccion);
+           let nueva = generarForma(x, y, direccion, PI);
+    formasTP1.push(nueva);
+    ultimaFormaH = nueva;
         }
 
         alternarDir = !alternarDir;
@@ -105,23 +106,24 @@ function draw() {
   }
 }
 
-function generarForma(x, y, direccion) {
+function generarForma(x, y, direccion, angulo) {
 
   let nuevaX = constrain(x + direccion.dx + random(-5, 5), 50, width - 50);
   let nuevaY = constrain(y + direccion.dy + random(-10, 10), 50, height - 50);
   let img = random(imagenesTP1);
-  let nueva = new FormaTP1(nuevaX, nuevaY, img);
+  let nueva = new FormaTP1(nuevaX, nuevaY, img, angulo);
   formasTP1.push(nueva);
-  return nueva;
+  return new FormaTP1(nuevaX, nuevaY, img, angulo);
 }
 
 class FormaTP1 {
-  constructor(x, y, img) {
+  constructor(x, y, img, angulo) {
     this.x = x;
     this.y = y;
     this.img = img;
     this.alpha = 255;
     this.escala = random(0.2, 0.5);
+    this.angulo = angulo;
   }
 
   actualizar() {
