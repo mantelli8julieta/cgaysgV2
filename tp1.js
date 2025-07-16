@@ -5,10 +5,13 @@ let imagenesTP1 = [];
 let ultimaFormaTP1 = null;
 let ultimaFormaH = null;
 
+let ultimaDibujada = 0;
+let intervaloMin = 150;
+
 let alternarDir = true;
 
 function preload() {
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 6; i++) {
     imagenesTP1.push(loadImage(`formas/forma${i}.png`));
   }
 }
@@ -29,7 +32,7 @@ function draw() {
   // Generar formas mientras hay voz activa
   if (vol > 0.009) {
     let x, y, angulo;
-
+if (millis() - ultimaDibujada > intervaloMin) {
     if (alternarDir) {
       // Verticales
       if (!ultimaFormaTP1 || ultimaFormaTP1.terminada()) {
@@ -66,9 +69,11 @@ function draw() {
     }
 
     alternarDir = !alternarDir;
+    ultimaDibujada = millis();
   }
+}
 
-  // Dibujar y actualizar formas
+  // for de dibujo y actualización  
   for (let i = formasTP1.length - 1; i >= 0; i--) {
     formasTP1[i].actualizar();
     formasTP1[i].mostrar();
@@ -83,7 +88,7 @@ function draw() {
 
 function generarForma(x, y, direccion, angulo) {
   let nuevaX = constrain(x + direccion.dx + random(-5, 5), 50, width - 50);
-  let nuevaY = constrain(y + direccion.dy + random(-10, 10), 50, height - 50);
+  let nuevaY = constrain(y + direccion.dy + random(-5, 5), 50, height - 50);
   let img = random(imagenesTP1);
   let nueva = new FormaTP1(nuevaX, nuevaY, img, angulo);
   formasTP1.push(nueva);
@@ -97,8 +102,8 @@ class FormaTP1 {
     this.img = img;
     this.alpha = 255;
     this.escala = random(0.2, 0.5);
-    this.angulo = angulo || PI * random (0,2);
-  }
+    this.angulo = angulo || HALF_PI * random (0,0.5); 
+    }
 
   actualizar() {
     if (!micTP1.enabled || micTP1.getLevel() < 0.05) {
