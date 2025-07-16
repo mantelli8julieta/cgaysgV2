@@ -10,7 +10,7 @@ let tiempoDeSonido = 0;
 
 function preload() {
   for (let i = 1; i <= 3; i++) {
-    imagenesTP1.push(loadImage(`forma${i}.png`));
+    imagenesTP1.push(loadImage(`formas/forma${i}.png`));
   }
 }
  
@@ -26,7 +26,7 @@ function draw() {
   background(240, 227, 206, 10);
   let vol = micTP1.getLevel();
 console.log("volumen es:" + vol);
- if (vol > 0.05) {
+ if (vol > 0.005) {
     if (!haySonido) {
       console.log("empieza el sonido");
       tiempoDeSonido = millis();
@@ -34,7 +34,7 @@ console.log("volumen es:" + vol);
     haySonido = true;
   }
 
-   if (vol <= 0.005) {
+   if (vol <= 0.07) {
     let segundosDeSonido = (millis() - tiempoDeSonido) / 1000.0;
     if (haySonido && segundosDeSonido > umbralTiempo) {
 console.log("se termina el sonido");
@@ -58,7 +58,7 @@ let x, y;
       { dx: -40, dy: 0 },   // izqui
     ]);
 
-    let nuevaX = constrain(x + direccion.dx + random(-10, 10), 50, width - 50);
+    let nuevaX = constrain(x + direccion.dx + random(-5, 5), 50, width - 50);
     let nuevaY = constrain(y + direccion.dy + random(-10, 10), 50, height - 50);
 
     let img = random(imagenesTP1);
@@ -97,7 +97,7 @@ class FormaTP1 {
 
   actualizar() {
     if (!micTP1.enabled || micTP1.getLevel() < 0.05) {
-      this.alpha -= 3;
+      this.alpha -= 0.005;
     }
   }
 
