@@ -10,6 +10,12 @@ let intervaloMin = 150;
 
 let alternarDir = true;
 
+//contadores para la gneración de figuras
+let maxVerticales = 15;
+let maxHorizontales = 15;
+let contadorVerticales = 0;
+let contadorHorizontales = 0;
+
 function preload() {
   for (let i = 1; i <= 6; i++) {
     imagenesTP1.push(loadImage(`formas/forma${i}.png`));
@@ -32,8 +38,8 @@ function draw() {
   // Generar formas mientras hay voz activa
   if (vol > 0.009) {
     let x, y, angulo;
-if (millis() - ultimaDibujada > intervaloMin) {
-    if (alternarDir) {
+    if (millis() - ultimaDibujada > intervaloMin) {
+    if (alternarDir && contadorVerticales < maxVerticales) {
       // Verticales
       if (!ultimaFormaTP1 || ultimaFormaTP1.terminada()) {
         x = width / 2;
@@ -50,7 +56,9 @@ if (millis() - ultimaDibujada > intervaloMin) {
       ]);
 
       ultimaFormaTP1 = generarForma(x, y, direccion, 0); // sin rotación
-    } else {
+      contadorVerticales++; //aumenta el contador para las figuras verticales
+
+    } else if (!alternarDir && contadorHorizontales < maxHorizontales) {
       // Horizontales
       if (!ultimaFormaH || ultimaFormaH.terminada()) {
         x = width / 2;
@@ -65,7 +73,10 @@ if (millis() - ultimaDibujada > intervaloMin) {
         { dx: -40, dy: 0 }
       ]);
 
-      ultimaFormaH = generarForma(x, y, direccion, PI); // rotación 180°
+      // acá se genera un ángulo aleatorio para que rote todo
+      let rotaTodo = random(0, TWO_PI);
+      ultimaFormaH = generarForma(x, y, direccion, rotaTodo); // rotación 180°
+      contadorHorizontales++;//aumenta el contador para las figuras horizontales
     }
 
     alternarDir = !alternarDir;
@@ -83,6 +94,8 @@ if (millis() - ultimaDibujada > intervaloMin) {
   if (formasTP1.length === 0) {
     ultimaFormaTP1 = null;
     ultimaFormaH = null;
+    contadorVerticales = 0;
+    contadorHorizontales = 0;
   }
 }
 
